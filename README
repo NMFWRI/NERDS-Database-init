@@ -1,0 +1,34 @@
+Author: Corey Beinhart, Data Manager, NMFWRI
+Date: 4/18/2024
+
+This package generates database tables from a pre-defined database structure. We host our databases
+both in Access and in MSSQL and require the ability to change how attributes are defined or how the tables are related
+to one another at the same time. So you can change values in the Excel Workbook that contains the database definitions
+and run the create_tables.py to recreate the tables with the correct definition. Additionally, in the case that we need
+to migrate our repository database from MSSQL to PostgreSQL, we can do that with minimal edits.
+
+To leverage this functionality, you will need to define your database tables and relationships using one of the
+FieldMappings_....xlxs files under tables/. The non-FieldMappings files are fixed lookup tables that get written to the
+database during creation.
+
+When the tables are getting created, the workflow is: convert field mappings to SQLAlchemy model -> connect to database ->
+drop all tables -> create tables from SQLAlchemy model. Because SQLAlchemy has a versioning functionality via alembic,
+this package is only intended for initial setup. It *can* be used as versioning in itself, but one must be very careful
+when changing definitions, as there's no logging mechanism. In time, another package will be built out that utilizes
+alembic; however, this is needed while we establish our v1.0 database for publishing.
+
+To use this, call from the terminal the following:
+
+py create_tables.py [Uplands[Access | MSSQL] | Riparian[Access | MSSQL]] [Field Mapping path] [SQLAlchemy model path]
+
+Choice 1 dictates whether the the tables are for the Uplands protocols or Riparian protocols.
+
+Choice 2 is the path to the field mapping Excel workbook. This is a document that provides table definitions for
+the tables used for each of these protocols defined in an Excel workbook. Each sheet in the workbook contains the
+definition for a table. The sheet contains table name, corresponding table in FFI database (used by another script),
+primary or foreign key designation, data type, field length, decimal places if applicable, default value, null
+capabilities, corresponding foreign table, and corresponding foreign key column. Workbooks are stored in the tables
+subfolder in the project directory.
+
+Choice 3 is the location of the SQLAlchemy model generated in the process. Models are stored in the models/
+directory.
